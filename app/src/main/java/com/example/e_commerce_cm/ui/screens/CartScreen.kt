@@ -50,7 +50,8 @@ import com.example.e_commerce_cm.viewmodel.CartViewModel
 @Composable
 fun CartScreen(
     cartViewModel: CartViewModel,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onCheckout: () -> Unit          // ← NUEVO parámetro
 ) {
     val cartItems by cartViewModel.cartItems.collectAsState()
     val total = cartViewModel.getTotal()
@@ -90,7 +91,7 @@ fun CartScreen(
                         }
                         Spacer(Modifier.height(12.dp))
                         Button(
-                            onClick = {},
+                            onClick = onCheckout,           // ← ahora navega al checkout
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(52.dp),

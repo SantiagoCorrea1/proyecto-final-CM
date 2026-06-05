@@ -13,8 +13,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
@@ -54,7 +54,7 @@ fun LoginScreen(
 ) {
     val loginState by authViewModel.loginState.collectAsState()
 
-    var username by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
 
@@ -93,10 +93,11 @@ fun LoginScreen(
             )
 
             OutlinedTextField(
-                value = username,
-                onValueChange = { username = it },
-                label = { Text("Usuario") },
-                leadingIcon = { Icon(Icons.Filled.Person, contentDescription = null) },
+                value = email,
+                onValueChange = { email = it },
+                label = { Text("Correo electrónico") },
+                leadingIcon = { Icon(Icons.Filled.Email, contentDescription = null) },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
@@ -146,12 +147,12 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(28.dp))
 
             Button(
-                onClick = { authViewModel.login(username, password) },
+                onClick = { authViewModel.login(email, password) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp),
                 shape = RoundedCornerShape(12.dp),
-                enabled = loginState !is AuthUiState.Loading && username.isNotBlank() && password.isNotBlank(),
+                enabled = loginState !is AuthUiState.Loading && email.isNotBlank() && password.isNotBlank(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.secondary
                 )

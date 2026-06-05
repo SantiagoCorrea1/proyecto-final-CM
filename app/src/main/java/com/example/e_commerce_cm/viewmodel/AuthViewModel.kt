@@ -12,38 +12,42 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 sealed class AuthUiState {
-    object Idle : AuthUiState()
+    object Idle    : AuthUiState()
     object Loading : AuthUiState()
     object Success : AuthUiState()
     data class Error(val message: String) : AuthUiState()
 }
 
 sealed class ProfileUiState {
-    object Idle : ProfileUiState()
+    object Idle    : ProfileUiState()
     object Loading : ProfileUiState()
     data class Loaded(val user: User) : ProfileUiState()
-    object Updated : ProfileUiState()
-    object Deleted : ProfileUiState()
+    object Updated  : ProfileUiState()
+    object Deleted  : ProfileUiState()
     data class Error(val message: String) : ProfileUiState()
 }
 
 class AuthViewModel : ViewModel() {
     private val repository = AuthRepository()
 
-    private val _loginState = MutableStateFlow<AuthUiState>(AuthUiState.Idle)
+    private val _loginState    = MutableStateFlow<AuthUiState>(AuthUiState.Idle)
     val loginState: StateFlow<AuthUiState> = _loginState.asStateFlow()
 
     private val _registerState = MutableStateFlow<AuthUiState>(AuthUiState.Idle)
     val registerState: StateFlow<AuthUiState> = _registerState.asStateFlow()
 
-    private val _profileState = MutableStateFlow<ProfileUiState>(ProfileUiState.Idle)
+    private val _profileState  = MutableStateFlow<ProfileUiState>(ProfileUiState.Idle)
     val profileState: StateFlow<ProfileUiState> = _profileState.asStateFlow()
+
+    // Referencia al CartViewModel para activar observación tras login
+    var cartViewModel: CartViewModel? = null
 
     fun login(username: String, password: String) {
         viewModelScope.launch {
             _loginState.value = AuthUiState.Loading
             try {
                 repository.login(username, password)
+                cartViewModel?.observeCart()   // ← Activar carrito de Firebase
                 _loginState.value = AuthUiState.Success
             } catch (e: Exception) {
                 _loginState.value = AuthUiState.Error("Usuario o contraseña incorrectos")
@@ -58,7 +62,15 @@ class AuthViewModel : ViewModel() {
                 repository.register(username, email, password, role)
                 _registerState.value = AuthUiState.Success
             } catch (e: Exception) {
-                _registerState.value = AuthUiState.Error("Error al registrar: ${e.message}")
+                _registerState.value = AuthUiState.Error(
+                    when {
+                        "email address is already in use" in (e.message ?: "") ->
+                            "Este correo ya está registrado"
+                        "badly formatted" in (e.message ?: "") ->
+                            "Formato de correo inválido"
+                        else -> "Error al registrar: ${e.message}"
+                    }
+                )
             }
         }
     }
@@ -102,12 +114,12 @@ class AuthViewModel : ViewModel() {
 
     fun logout() {
         SessionManager.logout()
-        _loginState.value = AuthUiState.Idle
+        _loginState.value    = AuthUiState.Idle
         _registerState.value = AuthUiState.Idle
-        _profileState.value = ProfileUiState.Idle
+        _profileState.value  = ProfileUiState.Idle
     }
 
-    fun resetLoginState() { _loginState.value = AuthUiState.Idle }
+    fun resetLoginState()    { _loginState.value    = AuthUiState.Idle }
     fun resetRegisterState() { _registerState.value = AuthUiState.Idle }
-    fun resetProfileState() { _profileState.value = ProfileUiState.Idle }
+    fun resetProfileState()  { _profileState.value  = ProfileUiState.Idle }
 }

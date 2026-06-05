@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,8 +23,6 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -66,7 +63,6 @@ fun RegisterScreen(
     var emailTouched by remember { mutableStateOf(false) }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
-    var selectedRole by remember { mutableStateOf(UserRole.CUSTOMER) }
 
     val isEmailValid = android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
     val showEmailError = emailTouched && !isEmailValid
@@ -179,43 +175,11 @@ fun RegisterScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
-
-            Text(
-                "Tipo de cuenta",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium,
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                FilterChip(
-                    selected = selectedRole == UserRole.CUSTOMER,
-                    onClick = { selectedRole = UserRole.CUSTOMER },
-                    label = { Text("Cliente") },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = MaterialTheme.colorScheme.secondary,
-                        selectedLabelColor = MaterialTheme.colorScheme.onSecondary
-                    )
-                )
-                FilterChip(
-                    selected = selectedRole == UserRole.ADMIN,
-                    onClick = { selectedRole = UserRole.ADMIN },
-                    label = { Text("Administrador") },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = MaterialTheme.colorScheme.secondary,
-                        selectedLabelColor = MaterialTheme.colorScheme.onSecondary
-                    )
-                )
-            }
-
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(28.dp))
 
             Button(
-                onClick = { authViewModel.register(username, email, password, selectedRole) },
+                // El rol siempre es CUSTOMER — el admin se crea directamente en Firebase
+                onClick = { authViewModel.register(username, email, password, UserRole.CUSTOMER) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp),
